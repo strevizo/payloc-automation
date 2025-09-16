@@ -1,0 +1,26 @@
+{
+  "name": "payloc-automation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cypress.config.js",
+  "scripts": {
+    "cy:open": "npx cypress open --config watchForFileChanges=false",
+    "api": "cypress run --browser chrome NODE_OPTIONS=--max-old-space-size=4096 --spec 'cypress/e2e/API/**.cy.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/strevizo/payloc-automation.git"
+  },
+  "keywords": [],
+  "author": "Sergio Trevizo",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/strevizo/payloc-automation/issues"
+  },
+  "homepage": "https://github.com/strevizo/payloc-automation#readme",
+  "dependencies": {
+    "cypress": "^14.5.4",
+    "dotenv": "^17.2.2"
+  }
+}
