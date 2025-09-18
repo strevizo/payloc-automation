@@ -1,9 +1,15 @@
+chai.use(require('chai-json-schema'))
 const { createEmployee, deleteAutomationEmployees } = require("../../support/api-helpers/employees");
 import employees from "../../fixtures/employees.json";
+import employeeSchemas from "../../support/schemas/employee.js";
 
 describe('Employees API - /Employees', () => {
     const apiUrl = Cypress.env('API_URL');
     const basicToken = Cypress.env('BASIC_TOKEN');
+    // Constants based on rules, using .env for easy updates
+    const paychecksPerYear = Cypress.env('PAY_PERIODS_PER_YEAR');
+    const employeeBenefitsPerYear = Cypress.env('EMPLOYEE_BENEFIT_COST');
+    const dependantBenefitsPerYear = Cypress.env('DEPENDANT_BENEFIT_COST');
     let newEmployee;
 
     const headers = {
@@ -12,6 +18,10 @@ describe('Employees API - /Employees', () => {
     };
 
     before('Clear previous automation data', () => {
+        // we are using the before hook to clear previously created data,
+        // using afterEach sometimes leave data behind if a test fails.
+        // Depending on the API behaviour this might be a bad idea when running
+        // in parallel as one spec might delete data another spec is using.
         deleteAutomationEmployees();
     })
 
@@ -26,7 +36,7 @@ describe('Employees API - /Employees', () => {
             });
         });
 
-        it.only('should return 200 when creating a new employee with valid data', () => {
+        it('should return 200 when creating a new employee with valid data', () => {
             cy.request({
                 method: 'POST',
                 url: `${apiUrl}/Employees`,
@@ -38,7 +48,7 @@ describe('Employees API - /Employees', () => {
             });
         });
 
-        it.only('should return 200 when adding a dependant to an employee', () => {
+        it('should return 200 when adding a dependant to an employee', () => {
             // const newEmployee = createEmployee(); 
             // Commenting out to prevent creating many employees and I can't delete,
             // ideally we would create an employee here and use that employee to update
@@ -50,6 +60,15 @@ describe('Employees API - /Employees', () => {
             employees.updateEmployee.lastName = newLastName;
             employees.updateEmployee.dependants = 1;
 
+            // Calculate benefits cost with 5 decimal precision
+            const employeeBenefitsPerPaycheck = (employeeBenefitsPerYear / paychecksPerYear);
+            const grossPerPaycheck = newEmployee.salary / paychecksPerYear;
+            const dependantBenefitsPerPaycheck = (dependantBenefitsPerYear * employees.updateEmployee.dependants) / paychecksPerYear;
+            const totalBenefitsPerPaycheck = Number((employeeBenefitsPerPaycheck + dependantBenefitsPerPaycheck).toFixed(5));
+            
+            // Calculate net with 5 decimal precision
+            const netPay = Math.ceil(((grossPerPaycheck) - totalBenefitsPerPaycheck) * 10000) / 10000;
+
             cy.request({
                 method: 'PUT',
                 url: `${apiUrl}/Employees`,
@@ -57,7 +76,7 @@ describe('Employees API - /Employees', () => {
                 body: employees.updateEmployee
             }).then((response) => {
                 expect(response.status).to.eq(200);
-                const depedantBenefitsCost = 500/26;
+                expect(response.body).to.be.jsonSchema(employeeSchemas.employeeBenefits);
                 expect(response.body).to.deep.equal({
                     "partitionKey": newEmployee.partitionKey,
                     "sortKey": newEmployee.sortKey,
@@ -67,10 +86,10 @@ describe('Employees API - /Employees', () => {
                     "lastName": newLastName,
                     "dependants": 1,
                     "salary": newEmployee.salary,
-                    "gross": newEmployee.gross,
-                    "benefitsCost": newEmployee.benefitsCost + depedantBenefitsCost,
-                    "net": newEmployee.gross - depedantBenefitsCost,
-                })
+                    "gross": grossPerPaycheck,
+                    "benefitsCost": totalBenefitsPerPaycheck,
+                    "net": netPay
+                });
             });
         });
     });

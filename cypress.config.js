@@ -9,7 +9,10 @@ module.exports = defineConfig({
       BASE_URL: process.env.BASE_URL,
       LOGIN_URL: process.env.LOGIN_URL,
       API_URL: process.env.API_URL,
-      BASIC_TOKEN: process.env.BASIC_TOKEN
+      BASIC_TOKEN: process.env.BASIC_TOKEN,
+      PAY_PERIODS_PER_YEAR: process.env.PAY_PERIODS_PER_YEAR,
+      EMPLOYEE_BENEFIT_COST: process.env.EMPLOYEE_BENEFIT_COST,
+      DEPENDANT_BENEFIT_COST: process.env.DEPENDANT_BENEFIT_COST
     },
     setupNodeEvents(on, config) {
       // implement node event listeners here
