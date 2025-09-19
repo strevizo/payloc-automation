@@ -5,7 +5,7 @@
   "main": "cypress.config.js",
   "scripts": {
     "cy:open": "npx cypress open --config watchForFileChanges=false",
-    "api": "cypress run --browser chrome NODE_OPTIONS=--max-old-space-size=4096 --spec 'cypress/e2e/API/**.cy.js'"
+    "api": "cypress run --browser chrome NODE_OPTIONS=--max-old-space-size=4096 --spec 'cypress/e2e/API/employees-id.cy.js'"
   },
   "repository": {
     "type": "git",

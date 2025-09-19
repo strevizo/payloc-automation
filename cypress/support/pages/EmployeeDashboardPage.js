@@ -111,6 +111,18 @@ class EmployeeDashboardPage {
     return cy.get('#deleteId');
   }
 
+  getRowByUserId(userId) {
+    return cy.get('#employeesTable tr').contains('td', userId).parent('tr');
+  }
+
+  getEditButtonByUserId(userId) {
+    return this.getRowByUserId(userId).find('.fa-edit');
+  }
+
+  getDeleteButtonByUserId(userId) {
+    return this.getRowByUserId(userId).find('.fa-times');
+  }
+
   // Helper Methods
   clickAddEmployee() {
     this.getAddEmployeeButton().click();
@@ -170,6 +182,38 @@ class EmployeeDashboardPage {
   verifyDeleteModalContent(firstName, lastName) {
     this.getDeleteFirstNameSpan().should('have.text', firstName);
     this.getDeleteLastNameSpan().should('have.text', lastName);
+  }
+
+  // Verification methods for specific user
+  verifyEmployeeInTableByUserId(userId, firstName, lastName, dependents) {
+    this.getRowByUserId(userId).within(() => {
+      cy.contains(firstName).should('be.visible');
+      cy.contains(lastName).should('be.visible');
+      cy.contains(dependents.toString()).should('be.visible');
+    });
+  }
+
+  verifyBenefitCalculationsByUserId(userId, expectedGross, expectedBenefits, expectedNet) {
+    this.getRowByUserId(userId).within(() => {
+      cy.contains(expectedGross).should('be.visible');
+      cy.contains(expectedBenefits).should('be.visible');
+      cy.contains(expectedNet).should('be.visible');
+    });
+  }
+
+  // Method to get specific cell values from a user's row
+  getUserRowData(userId) {
+    return this.getRowByUserId(userId).within(() => {
+      return {
+        firstName: cy.get('td').eq(2), // Adjust index based on table structure
+        lastName: cy.get('td').eq(1),
+        dependents: cy.get('td').eq(3),
+        salary: cy.get('td').eq(4),
+        grossPay: cy.get('td').eq(5),
+        benefitsCost: cy.get('td').eq(6),
+        netPay: cy.get('td').eq(7)
+      };
+    });
   }
 }
 

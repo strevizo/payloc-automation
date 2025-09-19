@@ -398,7 +398,7 @@ describe('Login Authentication', () => {
             // Should safely handle SQL injection attempts
         });
 
-        it.only('VALIDATION BUG: should limit username and password length according to schema validation', () => {
+        it('VALIDATION BUG: should limit username and password length according to schema validation', () => {
             // From swagger: username maxLength is 50, but let's test with longer strings
             const longUsername = 'a'.repeat(51); // 51 chars - should be rejected
             const longPassword = 'b'.repeat(100); // Test long password too
@@ -415,7 +415,7 @@ describe('Login Authentication', () => {
             loginPage.verifySpecificValidationError('The field Username must be a string with a maximum length of 50');
         });
 
-        it.only('VALIDATION BUG: should enforce 50 character limit on username', () => {
+        it('VALIDATION BUG: should enforce 50 character limit on username', () => {
             // This test documents that the 50-char limit is not enforced
             const exactlyFiftyChars = 'a'.repeat(50); // Should pass
             const fiftyOneChars = 'a'.repeat(51);     // Should fail but likely passes
