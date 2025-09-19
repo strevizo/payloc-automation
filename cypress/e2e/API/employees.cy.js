@@ -22,7 +22,7 @@ describe('Employees API - /Employees', () => {
         // using afterEach sometimes leave data behind if a test fails.
         // Depending on the API behaviour this might be a bad idea when running
         // in parallel as one spec might delete data another spec is using.
-        deleteAutomationEmployees();
+        // deleteAutomationEmployees();
     })
 
     describe('Positive Test Cases', () => {

@@ -1,3 +1,4 @@
+chai.use(require('chai-json-schema'));
 const { createEmployee, deleteAutomationEmployees } = require("../../support/api-helpers/employees");
 import employees from "../../fixtures/employees.json";
 import employeeSchemas from "../../support/schemas/employee.js";
@@ -25,14 +26,14 @@ describe('Employees API - /Employees/{id}', () => {
             });
         });
 
-        it.only('should return 200 when getting an employee by valid ID', () => {
+        it('should return 200 when getting an employee by valid ID', () => {
             cy.request({
                 method: 'GET',
                 url: `${apiUrl}/Employees/${validEmployeeId}`,
                 headers: headers
             }).then((response) => {
                 expect(response.status).to.eq(200);
-                expect(response.body).to.be.jsonSchema(employeeSchemas.employeeBenefits);
+                expect(response.body).to.be.jsonSchema(employeeSchemas.employeeDetails);
             });
         });
 
@@ -42,6 +43,7 @@ describe('Employees API - /Employees/{id}', () => {
                 url: `${apiUrl}/Employees/${validEmployeeId}`,
                 headers: headers
             }).then((response) => {
+                cy.log(response.body)
                 expect(response.status).to.eq(200);
             });
         });
@@ -114,6 +116,22 @@ describe('Employees API - /Employees/{id}', () => {
             }).then((response) => {
                 expect(response.status).to.eq(404);
             });
+        });
+
+        it('should reject empty username', () => {
+            // POST with username: ""
+        });
+
+        it('should reject negative salary', () => {
+            // POST with salary: -1000
+        });
+
+        it('should reject decimal dependants', () => {
+            // POST with dependants: 2.5
+        });
+
+        it('should ignore read-only fields in request', () => {
+            // POST with gross, net, benefitsCost in body
         });
     });
 });

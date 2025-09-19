@@ -29,6 +29,39 @@ const employeeBenefits = {
     }
 };
 
+const employeeDetails = {
+    type: 'object',
+    additionalProperties: false,
+    required: [
+        "partitionKey",
+        "sortKey",
+        "username",
+        "id",
+        "firstName",
+        "lastName",
+        "dependants",
+        "expiration",
+        "salary",
+        "gross",
+        "benefitsCost",
+        "net"
+    ],
+    properties: {
+        partitionKey: { type: 'string' },
+        sortKey: { type: 'string' },
+        username: { type: 'string' },
+        id: { type: 'string' },
+        firstName: { type: 'string' },
+        lastName: { type: 'string' },
+        dependants: { type: 'number' },
+        expiration: { type: 'string', format: 'date-time' },
+        salary: { type: 'number' },
+        gross: { type: 'number' },
+        benefitsCost: { type: 'number' },
+        net: { type: 'number' }
+    }
+};
+
 export default {
-    employeeBenefits
+    employeeBenefits, employeeDetails
 };

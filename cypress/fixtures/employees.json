@@ -1,6 +1,6 @@
 {
     "newEmployee": {
-        "firstName": "API",
+        "firstName": "Cypress API",
         "lastName": "Automation",
         "username": "mricardez",
         "dependants": 0,
