@@ -1,0 +1,15 @@
+{
+    "newEmployee": {
+        "firstName": "Cypress API",
+        "lastName": "Automation",
+        "username": "mricardez",
+        "dependants": 0,
+        "salary": 52000
+    },
+    "updateEmployee": {
+        "firstName": null,
+        "lastName": null,
+        "username": null,
+        "dependants": null
+    }
+}
