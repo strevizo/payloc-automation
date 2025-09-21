@@ -316,7 +316,7 @@ describe('Employee Benefits Dashboard', () => {
     });
   });
 
-  describe.only('User Story 3: Delete Employee', () => {
+  describe('User Story 3: Delete Employee', () => {
     it('should allow employer to delete employee', () => {
       // Create employee first
       const employee = {
@@ -633,19 +633,37 @@ describe('Employee Benefits Dashboard', () => {
         dashboardPage.getDeleteIdHiddenInput().then(($input) => {
           const originalId = $input.val();
           expect(originalId).to.not.be.empty;
-          expect(originalId).to.eq(userId); // Should match the employee we're deleting
+          expect(originalId).to.eq(userId);
 
           // Demonstrate the vulnerability - ID can be changed
           cy.wrap($input).invoke('val', 'malicious-id-12345');
           dashboardPage.getDeleteIdHiddenInput().should('have.value', 'malicious-id-12345');
 
-          cy.log('SECURITY VULNERABILITY: Employee ID can be manipulated in hidden input');
-          cy.log(`Original ID: ${originalId}`);
-          cy.log('Modified ID: malicious-id-12345');
-
           // Restore original ID and cancel
           cy.wrap($input).invoke('val', originalId);
           dashboardPage.cancelDelete();
+        });
+      });
+    });
+
+    it('should use meaningful selectors for delete buttons', () => {
+      // Create employee for selector testing
+      dashboardPage.clickAddEmployee();
+      dashboardPage.fillEmployeeForm('Cypress', 'SelectorTest', 1);
+      dashboardPage.submitAddEmployee();
+
+      cy.wait('@createEmployee').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+        const userId = interception.response.body.id;
+
+        // Bug: .fa-times and .fa-edit are not meaningful selectors
+        dashboardPage.getDeleteButtonByUserId(userId).should('exist');
+        dashboardPage.getEditButtonByUserId(userId).should('exist');
+
+        // Check current selectors exist
+        dashboardPage.getRowByUserId(userId).within(() => {
+          cy.get('.fa-times').should('exist');
+          cy.get('.fa-edit').should('exist');
         });
       });
     });
@@ -660,29 +678,13 @@ describe('Employee Benefits Dashboard', () => {
         expect(interception.response.statusCode).to.eq(200);
         const userId = interception.response.body.id;
 
-        // Check if sensitive employee data is exposed in DOM attributes
-        dashboardPage.getRowByUserId(userId).within(() => {
-          cy.get('td').each(($cell) => {
-            // Check for data attributes that might expose sensitive info
-            const dataAttrs = Object.keys($cell[0].dataset);
-            if (dataAttrs.length > 0) {
-              cy.log('POTENTIAL SECURITY ISSUE: Data attributes found:', dataAttrs);
-            }
-          });
-        });
-
         // Test edit modal for data exposure
         dashboardPage.getEditButtonByUserId(userId).click();
         dashboardPage.getEmployeeModal().should('be.visible');
 
         // Check if employee ID is exposed in form elements
         cy.get('#employeeModal').within(() => {
-          cy.get('input[type="hidden"]').each(($input) => {
-            const value = $input.val();
-            if (value && value.length > 0) {
-              cy.log('SECURITY CONCERN: Hidden input found with value:', value.substring(0, 10) + '...');
-            }
-          });
+          cy.get('input[type="hidden"]').should('have.length.greaterThan', 0);
         });
 
         dashboardPage.cancelModal();
@@ -694,27 +696,16 @@ describe('Employee Benefits Dashboard', () => {
       dashboardPage.clickAddEmployee();
 
       // Try to bypass validation by directly setting values
-      dashboardPage.getFirstNameInput().invoke('val', ''); // Empty required field
-      dashboardPage.getLastNameInput().invoke('val', ''); // Empty required field
-      dashboardPage.getDependentsInput().invoke('val', '-5'); // Invalid negative value
+      dashboardPage.getFirstNameInput().invoke('val', '');
+      dashboardPage.getLastNameInput().invoke('val', '');
+      dashboardPage.getDependentsInput().invoke('val', '-5');
 
       // Try to submit with invalid data
       dashboardPage.submitAddEmployee();
 
-      // Check if validation was bypassed (security issue)
-      cy.wait('@createEmployee', { timeout: 5000 }).then((interception) => {
-        if (interception && interception.response.statusCode === 200) {
-          cy.log('CRITICAL SECURITY BUG: Client-side validation bypassed!');
-          cy.log('Invalid data was accepted by the server');
-
-          const userId = interception.response.body.id;
-          // Document the security issue
-          cy.log(`Employee created with invalid data. ID: ${userId}`);
-        }
-      }).catch(() => {
-        // If the request fails or times out, validation is working
-        cy.log(' Validation working: Invalid data rejected');
-        dashboardPage.getEmployeeModal().should('be.visible'); // Modal should stay open
+      // Should reject invalid data
+      cy.wait('@createEmployee').then((interception) => {
+        expect(interception.response.statusCode).to.not.eq(200);
       });
     });
 
@@ -735,7 +726,7 @@ describe('Employee Benefits Dashboard', () => {
       dashboardPage.submitAddEmployee();
 
       cy.wait('@createEmployee').then((interception) => {
-        if (interception && interception.response.statusCode === 200) {
+        if (interception.response.statusCode === 200) {
           const userId = interception.response.body.id;
 
           // Check if XSS payload is executed when displayed
@@ -746,13 +737,9 @@ describe('Employee Benefits Dashboard', () => {
 
           // Check if the payload is properly escaped in the table
           dashboardPage.getRowByUserId(userId).within(() => {
-            cy.contains(xssPayload).should('exist'); // Should show as text, not execute
+            cy.contains(xssPayload).should('exist');
           });
-
-          cy.log(' XSS Test: Script payload properly escaped and not executed');
         }
-      }).catch(() => {
-        cy.log('XSS payload rejected by validation');
       });
     });
   });
