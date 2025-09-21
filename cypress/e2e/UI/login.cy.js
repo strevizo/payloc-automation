@@ -116,7 +116,7 @@ describe('Login Authentication', () => {
             loginPage.verifyStayOnLoginPage(); // This will likely fail - documenting the bug
         });
 
-        it('should NOT show functional UI elements when unauthenticated', () => {
+        it('should NOT show functional UI elements when not authenticated', () => {
             // CRITICAL BUG: Currently shows functional dashboard even without auth
             cy.visit(baseUrl, { failOnStatusCode: false });
 

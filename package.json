@@ -5,7 +5,8 @@
   "main": "cypress.config.js",
   "scripts": {
     "cy:open": "npx cypress open --config watchForFileChanges=false",
-    "api": "cypress run --browser chrome NODE_OPTIONS=--max-old-space-size=4096 --spec 'cypress/e2e/API/employees-id.cy.js'"
+    "api": "cypress run --browser chrome NODE_OPTIONS=--max-old-space-size=4096 --spec 'cypress/e2e/API/**.cy.js'",
+    "ui": "cypress run --browser chrome NODE_OPTIONS=--max-old-space-size=4096 --spec 'cypress/e2e/UI/**.cy.js'"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,7 @@
   "dependencies": {
     "chai-json-schema": "^1.5.1",
     "cypress": "^14.5.4",
+    "cypress-mochawesome-reporter": "^4.0.2",
     "dotenv": "^17.2.2"
   }
 }
